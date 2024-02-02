@@ -29,7 +29,17 @@ class App {
 
     socket.on("subscribe", (data) => {
       console.log("User inserted into room " + data.roomId);
+
       socket.join(data.roomId);
+      socket.join(data.socketId);
+
+      const roomSession = Array.from(socket.rooms);
+
+      if (roomSession.length > 1) {
+        socket
+          .to(data.roomId)
+          .emit("new user", { socketId: socket.id, username: data.username });
+      }
 
       socket.on("chat", (message) => {
         console.log("Send message: " + message);
@@ -39,6 +49,25 @@ class App {
           username: message.username,
           time: message.time,
         });
+      });
+    });
+
+    socket.on("new user start", (data) => {
+      console.log("New user connected: ", data);
+      socket.to(data.to).emit("new user start", { sender: data.sender });
+    });
+
+    socket.on("send peer description", (data) => {
+      socket.to(data.to).emit("send peer description", {
+        description: data.description,
+        sender: data.sender,
+      });
+    });
+
+    socket.on("ice candidates", (data) => {
+      socket.to(data.to).emit("ice candidates", {
+        candidate: data.candidate,
+        sender: data.sender,
       });
     });
   }
