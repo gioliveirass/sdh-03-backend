@@ -70,6 +70,11 @@ class App {
         sender: data.sender,
       });
     });
+
+    socket.on("disconnect", (data) => {
+      console.log("Socket disconnected: " + socket.id);
+      socket.disconnect();
+    });
   }
 }
 
